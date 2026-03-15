@@ -9,6 +9,9 @@ interface CompanyFormViewProps {
   onChange: (field: keyof CompanyData, value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
+  onAddDescription: () => void;
+  onRemoveDescription: (index: number) => void;
+  onChangeDescription: (index: number, value: string) => void;
 }
 
 export const CompanyFormView: React.FC<CompanyFormViewProps> = ({
@@ -17,6 +20,9 @@ export const CompanyFormView: React.FC<CompanyFormViewProps> = ({
   onChange,
   onSubmit,
   isSubmitting,
+  onAddDescription,
+  onRemoveDescription,
+  onChangeDescription,
 }) => {
   return (
     <form 
@@ -35,8 +41,6 @@ export const CompanyFormView: React.FC<CompanyFormViewProps> = ({
         onChange={(e) => onChange('cnpj', e.target.value)}
         error={errors.cnpj}
         maxLength={18}
-        minLength={18}
-        required
       />
 
       <Input
@@ -45,8 +49,41 @@ export const CompanyFormView: React.FC<CompanyFormViewProps> = ({
         value={data.companyName}
         onChange={(e) => onChange('companyName', e.target.value)}
         error={errors.companyName}
-        required
       />
+
+      <div className="mt-4">
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Descrição do Serviço
+          </label>
+          <button
+            type="button"
+            onClick={onAddDescription}
+            className="text-sm px-3 py-1 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 transition-colors"
+          >
+            Adicionar descrição
+          </button>
+        </div>
+
+        {data.serviceDescriptions.map((desc, index) => (
+          <div key={index} className="flex gap-2 mb-2">
+            <input
+              type="text"
+              className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Digite uma descrição do serviço"
+              value={desc}
+              onChange={(e) => onChangeDescription(index, e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => onRemoveDescription(index)}
+              className="px-3 py-2 text-sm rounded-md border border-red-500 text-red-600 hover:bg-red-50 transition-colors"
+            >
+              Remover
+            </button>
+          </div>
+        ))}
+      </div>
 
       <Select
         label="Tipo de Serviço"
