@@ -86,17 +86,20 @@ export const generateQuotePDF = async (data: CompanyData) => {
   doc.text('Orçamento', pageWidth / 2, yPos, { align: 'center' });
   yPos += 16;
 
-  // Body
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text('Serviço a ser contratado:', 20, yPos);
-  doc.setFont("helvetica", "normal");
-  yPos += 8;
-  doc.text('Locação de caminhão Munck, com operador, para realização de transporte.', 20, yPos);
-  yPos += 12;
-  
-  doc.text('\u2022 Medição do período se inicia e se encerra na nossa base.', 20, yPos);
-  yPos += 10;
+  // Body if no service descriptions
+
+  if (data.serviceDescriptions.length <= 0) {
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text('Serviço a ser contratado:', 20, yPos);
+    doc.setFont("helvetica", "normal");
+    yPos += 8;
+    doc.text('Locação de caminhão Munck, com operador, para realização de transporte.', 20, yPos);
+    yPos += 12;
+    
+    doc.text('\u2022 Medição do período se inicia e se encerra na nossa base.', 20, yPos);
+    yPos += 10;
+  }
 
   if (data.serviceDescriptions) {
     yPos += 8
