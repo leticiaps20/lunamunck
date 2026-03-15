@@ -4,7 +4,16 @@ import { useCompanyController } from '../src/controllers/useCompanyController';
 import { CompanyFormView } from '../src/views/CompanyFormView';
 
 export default function Home() {
-  const { data, errors, isSubmitting, handleChange, handleSubmit } = useCompanyController();
+  const { 
+    data, 
+    errors, 
+    isSubmitting, 
+    handleChange, 
+    handleSubmit,
+    addServiceDescription,
+    removeServiceDescription,
+    handleServiceDescriptionChange,
+  } = useCompanyController();
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans p-4">
@@ -19,6 +28,9 @@ export default function Home() {
           onChange={handleChange}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
+          onAddDescription={addServiceDescription}
+          onRemoveDescription={removeServiceDescription}
+          onChangeDescription={handleServiceDescriptionChange}
         />
       </div>
     </div>

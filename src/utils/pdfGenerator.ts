@@ -3,6 +3,10 @@ import { CompanyData } from '../models/CompanyModel';
 
 export const generateQuotePDF = async (data: CompanyData) => {
   const doc = new jsPDF();
+  const trimmedCompanyName = data.companyName.trim();
+  const cnpjDigits = data.cnpj.replace(/\D/g, '');
+  const hasCompanyName = !!trimmedCompanyName;
+  const hasCnpj = cnpjDigits.length === 14;
   
   // Load Logo
   const logoUrl = '/logo.png';
@@ -18,7 +22,7 @@ export const generateQuotePDF = async (data: CompanyData) => {
     });
     
     // Original dimensions are 400x194. Aspect ratio ~ 2.06
-    // Width 60, height ~ 29.1
+    // Width 60, height ~ 29.1v
     doc.addImage(imgData, 'PNG', 20, 12, 60, 29.1);
   } catch (error) {
     console.warn("Could not load logo image for PDF", error);
@@ -45,17 +49,37 @@ export const generateQuotePDF = async (data: CompanyData) => {
   
   yPos += 10;
   
-  // Contratante Info
+  // Contratante Info (opcional)
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text(`Contratante: ${data.companyName}`, 20, yPos);
-  yPos += 6;
-  doc.text(`CNPJ: ${data.cnpj}`, 20, yPos);
 
-  yPos += 8;
-  // Add second horizontal line
-  doc.line(20, yPos, pageWidth - rightMargin, yPos);
-  yPos += 12;
+  if (hasCompanyName) {
+    doc.text(`Contratante: ${trimmedCompanyName}`, 20, yPos);
+    yPos += 6;
+  }
+
+  if (hasCnpj) {
+    doc.text(`CNPJ: ${data.cnpj}`, 20, yPos);
+    yPos += 6;
+  }
+
+  if (hasCompanyName && hasCnpj) {
+    yPos += 8;
+    // Add second horizontal line somente se houver algum dado
+    doc.line(20, yPos, pageWidth - rightMargin, yPos);
+    yPos += 12;
+  } else if (!hasCompanyName && hasCnpj) {
+    yPos += 0;
+    // Add second horizontal line somente se houver algum dado
+    doc.line(20, yPos, pageWidth - rightMargin, yPos);
+    yPos += 12;
+  } else if (hasCompanyName && !hasCnpj) {
+    yPos += 0;
+    // Add second horizontal line somente se houver algum dado
+    doc.line(20, yPos, pageWidth - rightMargin, yPos);
+    yPos += 12;
+  }
+
 
   // Title
   doc.setFontSize(16);
@@ -72,7 +96,37 @@ export const generateQuotePDF = async (data: CompanyData) => {
   yPos += 12;
   
   doc.text('\u2022 Medição do período se inicia e se encerra na nossa base.', 20, yPos);
-  yPos += 20;
+  yPos += 10;
+
+  if (data.serviceDescriptions) {
+    yPos += 8
+  }
+
+  // Descrição do Serviço (lista opcional)
+  const cleanedServiceDescriptions =
+    (data.serviceDescriptions || [])
+      .map((desc) => desc.trim())
+      .filter((desc) => desc.length > 0);
+
+  if (cleanedServiceDescriptions.length > 0) {
+    doc.setFont("helvetica", "bold");
+    doc.text('Descrição do Serviço:', 20, yPos);
+    yPos += 8;
+    doc.setFont("helvetica", "normal");
+
+    cleanedServiceDescriptions.forEach((desc) => {
+      const lines = doc.splitTextToSize(desc, pageWidth - rightMargin - 20);
+      lines.forEach((line: string) => {
+        doc.text(`\u2022 ${line}`, 20, yPos);
+        yPos += 8;
+      });
+    });
+
+    // Espaço final após a última descrição para manter
+    // a mesma distância em relação ao próximo título ("Valores")
+    // equivalente ao espaço usado entre o bloco anterior e este.
+    yPos += 10;
+  }
 
   doc.setFont("helvetica", "bold");
   doc.text('Valores:', 20, yPos);
@@ -93,7 +147,7 @@ export const generateQuotePDF = async (data: CompanyData) => {
   }
   
   doc.text(`\u2022 Caso necessário, será cobrado ${data.additionalHourlyValue} por hora adicional.`, 20, yPos);
-  yPos += 40;
+  yPos += 30;
 
   doc.setFont("helvetica", "bold");
   doc.text('Valores para pagamento à vista.', pageWidth / 2, yPos, { align: 'center' });
@@ -101,5 +155,8 @@ export const generateQuotePDF = async (data: CompanyData) => {
   doc.text('Orçamento válido por 3 dias', pageWidth / 2, yPos, { align: 'center' });
 
   // Save the PDF
-  doc.save(`Orcamento_${data.companyName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+  const safeName = trimmedCompanyName
+    ? trimmedCompanyName.replace(/[^a-zA-Z0-9]/g, '_')
+    : 'Sem_Identificacao';
+  doc.save(`Orcamento_${safeName}.pdf`);
 };

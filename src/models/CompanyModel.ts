@@ -7,6 +7,7 @@ export interface CompanyData {
   hourlyValue: string;
   dailyValue: string;
   additionalHourlyValue: string;
+  serviceDescriptions: string[];
 }
 
 export const initialCompanyData: CompanyData = {
@@ -16,19 +17,15 @@ export const initialCompanyData: CompanyData = {
   hourlyValue: '',
   dailyValue: '',
   additionalHourlyValue: '',
+   serviceDescriptions: [],
 };
 
 export const validateCompanyData = (data: CompanyData) => {
   const errors: Partial<Record<keyof CompanyData, string>> = {};
   
-  if (!data.cnpj.trim()) {
-    errors.cnpj = "CNPJ é obrigatório.";
-  } else if (data.cnpj.replace(/\D/g, '').length !== 14) {
-    errors.cnpj = "CNPJ deve conter 14 dígitos.";
-  }
-
-  if (!data.companyName.trim()) {
-    errors.companyName = "Nome da empresa é obrigatório.";
+  const cnpjDigits = data.cnpj.replace(/\D/g, '');
+  if (cnpjDigits && cnpjDigits.length !== 14) {
+    errors.cnpj = "CNPJ deve conter 14 dígitos ou ficar em branco.";
   }
 
   if (!data.contractType) {

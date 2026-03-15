@@ -50,6 +50,28 @@ export const useCompanyController = () => {
     }
   };
 
+  const addServiceDescription = () => {
+    setData((prev) => ({
+      ...prev,
+      serviceDescriptions: [...(prev.serviceDescriptions || []), ''],
+    }));
+  };
+
+  const removeServiceDescription = (index: number) => {
+    setData((prev) => ({
+      ...prev,
+      serviceDescriptions: prev.serviceDescriptions.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleServiceDescriptionChange = (index: number, value: string) => {
+    setData((prev) => {
+      const next = [...(prev.serviceDescriptions || [])];
+      next[index] = value;
+      return { ...prev, serviceDescriptions: next };
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -89,5 +111,8 @@ export const useCompanyController = () => {
     isSubmitting,
     handleChange,
     handleSubmit,
+    addServiceDescription,
+    removeServiceDescription,
+    handleServiceDescriptionChange,
   };
 };
